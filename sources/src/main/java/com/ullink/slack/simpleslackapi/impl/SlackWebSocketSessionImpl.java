@@ -49,6 +49,7 @@ import java.net.ConnectException;
 import java.net.Proxy;
 import java.net.URI;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -99,6 +100,7 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
 
     private static final String LIST_USERS = "users.list";
 
+    private static final String CONVERSTATIONS_MEMBERS = "conversations.members";
 
     private static final Logger               LOGGER                     = LoggerFactory.getLogger(SlackWebSocketSessionImpl.class);
 
@@ -340,6 +342,7 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
 
         users = sessionParser.getUsers();
         integrations = sessionParser.getIntegrations();
+        updateChannelMembers(sessionParser);
         channels = sessionParser.getChannels();
         sessionPersona = sessionParser.getSessionPersona();
         team = sessionParser.getTeam();
@@ -350,6 +353,42 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
         webSocketConnectionURL = sessionParser.getWebSocketURL();
         LOGGER.debug("retrieved websocket URL : " + webSocketConnectionURL);
         establishWebsocketConnection();
+    }
+
+    private void updateChannelMembers(SlackJSONSessionStatusParser sessionParser) {
+      for (Entry<String, SlackChannel> channelInfo : sessionParser.getChannels().entrySet()) {
+        Set<SlackUser> membersForChannel = getMembersForChannel(channelInfo.getKey());
+        membersForChannel.forEach(u -> channelInfo.getValue().addUser(u));
+      }
+    }
+
+    private Set<SlackUser> getMembersForChannel(String channelId) {
+        JsonParser parser = new JsonParser();
+        Set<SlackUser> membersForChannel = new HashSet<>();
+
+        Map<String, String> params = new HashMap<>();
+        params.put("token", authToken);
+        params.put("channel", channelId);
+        JsonObject answerJson;
+
+        while (true) {
+            SlackMessageHandle<GenericSlackReply> handle = postGenericSlackCommand(params, CONVERSTATIONS_MEMBERS);
+            String answer = handle.getReply().getPlainAnswer();
+            answerJson = parser.parse(answer).getAsJsonObject();
+            for (JsonElement member : answerJson.get("members").getAsJsonArray()) {
+                membersForChannel.add(users.get(member.getAsString()));
+            }
+
+            if (!answerJson.get("response_metadata").isJsonNull() &&
+                !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").isJsonNull() &&
+                !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString().isEmpty()) {
+                params.put("cursor", answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString());
+            } else {
+                break;
+            }
+        }
+
+        return membersForChannel;
     }
 
     private void establishWebsocketConnection() throws IOException
