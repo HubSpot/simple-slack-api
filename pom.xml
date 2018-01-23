@@ -14,7 +14,7 @@
   </parent>
 
   <modules>
-    <module>simpleslackapi-client</module>
+    <module>sources</module>
   </modules>
 
   <dependencyManagement>
@@ -49,6 +49,22 @@
         <version>1.12</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.16.16</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>4.4.8</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -58,6 +74,26 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
           <skip>true</skip>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.basepom.maven</groupId>
+        <artifactId>duplicate-finder-maven-plugin</artifactId>
+        <configuration>
+          <exceptions>
+            <exception>
+              <conflictingDependencies>
+                <dependency>
+                  <groupId>org.jmockit</groupId>
+                  <artifactId>jmockit</artifactId>
+                </dependency>
+                <dependency>
+                  <groupId>junit</groupId>
+                  <artifactId>junit</artifactId>
+                </dependency>
+              </conflictingDependencies>
+            </exception>
+          </exceptions>
         </configuration>
       </plugin>
     </plugins>
