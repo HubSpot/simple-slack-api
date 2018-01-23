@@ -358,7 +358,9 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
     private void updateChannelMembers(SlackJSONSessionStatusParser sessionParser) {
       for (Entry<String, SlackChannel> channelInfo : sessionParser.getChannels().entrySet()) {
         Set<SlackUser> membersForChannel = getMembersForChannel(channelInfo.getKey());
-        membersForChannel.forEach(u -> channelInfo.getValue().addUser(u));
+          for (SlackUser u : membersForChannel) {
+              channelInfo.getValue().addUser(u);
+          }
       }
     }
 
