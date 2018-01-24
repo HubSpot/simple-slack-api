@@ -381,25 +381,23 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         params.put("channel", channelId);
         JsonObject answerJson;
 
-        while (true) {
-            SlackMessageHandle<GenericSlackReply> handle = postGenericSlackCommand(params, CONVERSTATIONS_MEMBERS);
-            String answer = handle.getReply().getPlainAnswer();
-            answerJson = parser.parse(answer).getAsJsonObject();
-            for (JsonElement member : answerJson.get("members").getAsJsonArray()) {
-                membersForChannel.add(users.get(member.getAsString()));
-            }
-
-            if (!answerJson.get("response_metadata").isJsonNull() &&
-                !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").isJsonNull() &&
-                !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString().isEmpty()) {
-                params.put("cursor", answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString());
-            } else {
-                break;
-            }
-        }
+        do {
+          SlackMessageHandle<GenericSlackReply> handle = postGenericSlackCommand(params, CONVERSTATIONS_MEMBERS);
+          String answer = handle.getReply().getPlainAnswer();
+          answerJson = parser.parse(answer).getAsJsonObject();
+          for (JsonElement member : answerJson.get("members").getAsJsonArray()) {
+            membersForChannel.add(users.get(member.getAsString()));
+          }
+        } while (hasMoreMembers(answerJson));
 
         LOGGER.info("got {} members for channel {}", membersForChannel.size(), channelId);
         return membersForChannel;
+    }
+
+    private boolean hasMoreMembers(JsonObject answerJson) {
+      return !answerJson.get("response_metadata").isJsonNull() &&
+          !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").isJsonNull() &&
+          !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString().isEmpty();
     }
 
     private void establishWebsocketConnection() throws IOException
