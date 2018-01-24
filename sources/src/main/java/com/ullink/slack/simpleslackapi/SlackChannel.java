@@ -62,7 +62,7 @@ public class SlackChannel {
     public Collection<SlackUser> getMembers() {
         if (members.isEmpty()) {
             try {
-                return getMembersForChannelCallable.call();
+                return getMembersForChannelCallable.setChannelId(id).call();
             } catch (Exception e) {
                 return Collections.emptySet();
             }

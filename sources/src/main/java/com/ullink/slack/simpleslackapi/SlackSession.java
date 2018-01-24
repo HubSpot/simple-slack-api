@@ -41,7 +41,9 @@ public interface SlackSession {
 
     Collection<SlackUser> getUsers();
 
-    interface GetMembersForChannelCallable extends Callable<Set<SlackUser>> {}
+    interface GetMembersForChannelCallable extends Callable<Set<SlackUser>> {
+        GetMembersForChannelCallable setChannelId(String channelId);
+    }
 
     GetMembersForChannelCallable getMembersForChannelCallable(String channelId);
 
@@ -73,7 +75,7 @@ public interface SlackSession {
 
     SlackMessageHandle<ParsedSlackReply> inviteUser(String email, String firstName, boolean setActive);
 
-    void connect() throws IOException;
+    void connect() throws Exception;
 
     void disconnect() throws IOException;
 

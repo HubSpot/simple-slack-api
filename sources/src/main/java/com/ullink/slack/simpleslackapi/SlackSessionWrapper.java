@@ -125,7 +125,7 @@ public class SlackSessionWrapper implements SlackSession
         return delegate.inviteUser(email, firstName, setActive);
     }
 
-    @Override public void connect() throws IOException
+    @Override public void connect() throws Exception
     {
         delegate.connect();
     }

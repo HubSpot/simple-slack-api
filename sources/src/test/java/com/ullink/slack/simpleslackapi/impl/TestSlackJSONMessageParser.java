@@ -251,7 +251,7 @@ public class TestSlackJSONMessageParser {
         };
         try {
             session.connect();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

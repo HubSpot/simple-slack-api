@@ -253,10 +253,17 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
     }
 
     public class GetMembersForChannelImpl implements GetMembersForChannelCallable {
-        private final String channelId;
+        private String channelId;
+
+        GetMembersForChannelImpl() {}
 
         GetMembersForChannelImpl(String channelId) {
             this.channelId = channelId;
+        }
+
+        public GetMembersForChannelImpl setChannelId(String channelId) {
+            this.channelId = channelId;
+            return this;
         }
 
         @Override
@@ -303,7 +310,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
     }
 
     @Override
-    public void connect() throws IOException {
+    public void connect() throws Exception {
         wantDisconnect = false;
         connectImpl();
         LOGGER.debug("starting actions monitoring");
@@ -318,7 +325,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         stopConnectionMonitoring();
     }
 
-    public void reconnect() throws IOException{
+    public void reconnect() throws Exception{
         while(true) {
             if (!this.isConnected()) {
                 connectImpl();
@@ -337,7 +344,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         return websocketSession != null && websocketSession.isOpen();
     }
 
-    private void connectImpl() throws IOException
+    private void connectImpl() throws Exception
     {
         LOGGER.info("connecting to slack");
         HttpClient httpClient = getHttpClient();
@@ -523,7 +530,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
                         LOGGER.info("monitoring thread interrupted");
                         break;
                     }
-                    catch (IOException e) {
+                    catch (Exception e) {
                         LOGGER.error("unexpected exception on monitoring thread ", e);
                     }
                 }

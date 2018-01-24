@@ -16,7 +16,6 @@ import com.ullink.slack.simpleslackapi.SlackPersona;
 import com.ullink.slack.simpleslackapi.SlackSession.GetMembersForChannelCallable;
 import com.ullink.slack.simpleslackapi.SlackTeam;
 import com.ullink.slack.simpleslackapi.SlackUser;
-import com.ullink.slack.simpleslackapi.impl.SlackWebSocketSessionImpl.GetMembersForChannelImpl;
 
 
 class SlackJSONSessionStatusParser {
@@ -68,7 +67,7 @@ class SlackJSONSessionStatusParser {
         return error;
     }
     
-    void parse() throws Exception {
+    void parse() {
         LOGGER.debug("parsing session status : " + toParse);
         JsonParser parser = new JsonParser();
         JsonObject jsonResponse = parser.parse(toParse).getAsJsonObject();
@@ -103,7 +102,7 @@ class SlackJSONSessionStatusParser {
         for (JsonElement jsonObject : channelsJson)
         {
             JsonObject jsonChannel = jsonObject.getAsJsonObject();
-            SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, GetMembersForChannelImpl.class);
+            SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, getMembersForChannelCallable);
             LOGGER.debug("slack public channel found : " + channel.getId());
             channels.put(channel.getId(), channel);
         }
@@ -114,7 +113,7 @@ class SlackJSONSessionStatusParser {
             for (JsonElement jsonObject : groupsJson)
             {
                 JsonObject jsonChannel = jsonObject.getAsJsonObject();
-                SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, GetMembersForChannelImpl.class);
+                SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, getMembersForChannelCallable);
                 LOGGER.debug("slack private group found : " + channel.getId());
                 channels.put(channel.getId(), channel);
             }
@@ -127,7 +126,7 @@ class SlackJSONSessionStatusParser {
             for (JsonElement jsonObject : imsJson)
             {
                 JsonObject jsonChannel = jsonObject.getAsJsonObject();
-                SlackChannel channel = SlackJSONParsingUtils.buildSlackImChannel(jsonChannel, users, GetMembersForChannelImpl.class);
+                SlackChannel channel = SlackJSONParsingUtils.buildSlackImChannel(jsonChannel, users, getMembersForChannelCallable);
                 LOGGER.debug("slack im channel found : " + channel.getId());
                 channels.put(channel.getId(), channel);
             }
