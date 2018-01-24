@@ -41,11 +41,9 @@ public interface SlackSession {
 
     Collection<SlackUser> getUsers();
 
-    interface GetUsersForChannel extends Callable<Set<SlackUser>> {
-        GetUsersForChannel setChannelId(String channelId);
-    }
+    interface GetMembersForChannelCallable extends Callable<Set<SlackUser>> {}
 
-    GetUsersForChannel getUsersForChannel(String channelId);
+    GetMembersForChannelCallable getMembersForChannelCallable(String channelId);
 
     Collection<SlackBot> getBots();
 

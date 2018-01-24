@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.ullink.slack.simpleslackapi.*;
-import com.ullink.slack.simpleslackapi.SlackSession.GetUsersForChannel;
 import com.ullink.slack.simpleslackapi.events.*;
 import com.ullink.slack.simpleslackapi.SlackChatConfiguration.Avatar;
 import com.ullink.slack.simpleslackapi.events.userchange.SlackTeamJoin;
@@ -51,8 +50,6 @@ import java.net.Proxy;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -255,12 +252,11 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         }
     }
 
-    public class GetUsersForChannel implements SlackSession.GetUsersForChannel {
-        private String channelId;
+    public class GetMembersForChannelImpl implements GetMembersForChannelCallable {
+        private final String channelId;
 
-        public GetUsersForChannel setChannelId(String channelId) {
+        GetMembersForChannelImpl(String channelId) {
             this.channelId = channelId;
-            return this;
         }
 
         @Override
@@ -349,7 +345,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         HttpResponse response = httpClient.execute(request);
         LOGGER.debug(response.getStatusLine().toString());
         String jsonResponse = consumeToString(response.getEntity().getContent());
-        final SlackJSONSessionStatusParser sessionParser = new SlackJSONSessionStatusParser(jsonResponse, new GetUsersForChannel());
+        final SlackJSONSessionStatusParser sessionParser = new SlackJSONSessionStatusParser(jsonResponse, new GetMembersForChannelImpl());
         sessionParser.parse();
         if (sessionParser.getError() != null)
         {
@@ -847,8 +843,8 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
     }
 
     @Override
-    public GetUsersForChannel getUsersForChannel(String channelId) {
-      return new GetUsersForChannel().setChannelId(channelId);
+    public GetMembersForChannelImpl getMembersForChannelCallable(String channelId) {
+      return new GetMembersForChannelImpl(channelId);
     }
 
     public SlackMessageHandle<EmojiSlackReply> listEmoji() {
@@ -1169,7 +1165,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         @Override public void onEvent(SlackChannelArchived event, SlackSession session)
         {
             SlackChannel channel = channels.get(event.getSlackChannel().getId());
-            SlackChannel newChannel = new SlackChannel(channel.getId(), channel.getName(), getUsersForChannel(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), true);
+            SlackChannel newChannel = new SlackChannel(channel.getId(), channel.getName(), getMembersForChannelCallable(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), true);
             channels.put(newChannel.getId(), newChannel);
         }
     };
@@ -1195,7 +1191,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         @Override public void onEvent(SlackChannelRenamed event, SlackSession session)
         {
             SlackChannel channel = channels.get(event.getSlackChannel().getId());
-            SlackChannel newChannel = new SlackChannel(channel.getId(), event.getNewName(), getUsersForChannel(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), channel.isArchived());
+            SlackChannel newChannel = new SlackChannel(channel.getId(), event.getNewName(), getMembersForChannelCallable(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), channel.isArchived());
             channels.put(newChannel.getId(), newChannel);
         }
     };
@@ -1205,7 +1201,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         @Override public void onEvent(SlackChannelUnarchived event, SlackSession session)
         {
             SlackChannel channel = channels.get(event.getSlackChannel().getId());
-            SlackChannel newChannel = new SlackChannel(channel.getId(), channel.getName(), getUsersForChannel(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), false);
+            SlackChannel newChannel = new SlackChannel(channel.getId(), channel.getName(), getMembersForChannelCallable(channel.getId()), channel.getTopic(), channel.getPurpose(), channel.isDirect(), channel.isMember(), false);
             channels.put(newChannel.getId(), newChannel);
         }
     };

@@ -56,8 +56,8 @@ public class SlackSessionWrapper implements SlackSession
     }
 
     @Override
-    public GetUsersForChannel getUsersForChannel(String channelId) {
-        return delegate.getUsersForChannel(channelId);
+    public GetMembersForChannelCallable getMembersForChannelCallable(String channelId) {
+        return delegate.getMembersForChannelCallable(channelId);
     }
 
     @Override public Collection<SlackBot> getBots()

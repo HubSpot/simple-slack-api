@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ullink.slack.simpleslackapi.SlackSession.GetUsersForChannel;
+import com.ullink.slack.simpleslackapi.SlackSession.GetMembersForChannelCallable;
 
 
 //TODO: a domain object
@@ -14,7 +14,7 @@ public class SlackChannel {
     private String         id;
     private String         name;
     private Set<SlackUser> members = new HashSet<>();
-    private GetUsersForChannel getUsersForChannel;
+    private GetMembersForChannelCallable getMembersForChannelCallable;
     private String         topic;
     private String         purpose;
     private boolean        isMember;
@@ -22,7 +22,7 @@ public class SlackChannel {
 
     public SlackChannel(String id,
                         String name,
-                        GetUsersForChannel getUsersForChannel,
+                        GetMembersForChannelCallable getMembersForChannelCallable,
                         String topic,
                         String purpose,
                         boolean direct,
@@ -31,7 +31,7 @@ public class SlackChannel {
     {
         this.id = id;
         this.name = name;
-        this.getUsersForChannel = getUsersForChannel;
+        this.getMembersForChannelCallable = getMembersForChannelCallable;
         this.topic = topic;
         this.purpose = purpose;
         this.direct = direct;
@@ -62,8 +62,7 @@ public class SlackChannel {
     public Collection<SlackUser> getMembers() {
         if (members.isEmpty()) {
             try {
-                getUsersForChannel.setChannelId(id);
-                return getUsersForChannel.call();
+                return getMembersForChannelCallable.call();
             } catch (Exception e) {
                 return Collections.emptySet();
             }

@@ -187,7 +187,7 @@ class SlackJSONMessageParser {
             if (channelId.startsWith("D"))
             {
                 // direct messaging, on the fly channel creation
-                return new SlackChannel(channelId, channelId, slackSession.getUsersForChannel(channelId), "", "", true, false, false);
+                return new SlackChannel(channelId, channelId, slackSession.getMembersForChannelCallable(channelId), "", "", true, false, false);
             }
             else
             {
@@ -321,7 +321,7 @@ class SlackJSONMessageParser {
             purpose = GsonHelper.getStringOrNull((channelJSONObject.get("purpose").getAsJsonObject().get("value")));
         }
         boolean isArchived = GsonHelper.getBooleanOrDefaultValue(channelJSONObject.get("is_archived"), false);
-        return new SlackChannel(id, name, slackSession.getUsersForChannel(id), topic, purpose, id.startsWith("D"),false, isArchived);
+        return new SlackChannel(id, name, slackSession.getMembersForChannelCallable(id), topic, purpose, id.startsWith("D"),false, isArchived);
     }
 
 
