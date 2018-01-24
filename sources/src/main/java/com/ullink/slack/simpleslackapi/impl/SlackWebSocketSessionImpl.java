@@ -372,6 +372,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
     }
 
     private Set<SlackUser> getMembersForChannel(String channelId) {
+        LOGGER.info("getting members for channel {}", channelId);
         JsonParser parser = new JsonParser();
         Set<SlackUser> membersForChannel = new HashSet<>();
 
@@ -397,6 +398,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
             }
         }
 
+        LOGGER.info("got {} members for channel {}", membersForChannel.size(), channelId);
         return membersForChannel;
     }
 
