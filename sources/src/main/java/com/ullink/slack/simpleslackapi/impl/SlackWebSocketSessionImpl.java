@@ -333,7 +333,7 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
         HttpResponse response = httpClient.execute(request);
         LOGGER.debug(response.getStatusLine().toString());
         String jsonResponse = consumeToString(response.getEntity().getContent());
-        SlackJSONSessionStatusParser sessionParser = new SlackJSONSessionStatusParser(jsonResponse);
+        final SlackJSONSessionStatusParser sessionParser = new SlackJSONSessionStatusParser(jsonResponse);
         sessionParser.parse();
         if (sessionParser.getError() != null)
         {
@@ -343,7 +343,14 @@ class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implements Slac
 
         users = sessionParser.getUsers();
         integrations = sessionParser.getIntegrations();
-        updateChannelMembers(sessionParser);
+
+        Runnable runnable = new Runnable() {
+            public void run() {
+                updateChannelMembers(sessionParser);
+            }
+        };
+
+        new Thread(runnable).start();
         channels = sessionParser.getChannels();
         sessionPersona = sessionParser.getSessionPersona();
         team = sessionParser.getTeam();
