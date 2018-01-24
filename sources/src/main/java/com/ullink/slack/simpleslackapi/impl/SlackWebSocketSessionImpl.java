@@ -310,7 +310,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
     }
 
     @Override
-    public void connect() throws Exception {
+    public void connect() throws IOException {
         wantDisconnect = false;
         connectImpl();
         LOGGER.debug("starting actions monitoring");
@@ -344,7 +344,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
         return websocketSession != null && websocketSession.isOpen();
     }
 
-    private void connectImpl() throws Exception
+    private void connectImpl() throws IOException
     {
         LOGGER.info("connecting to slack");
         HttpClient httpClient = getHttpClient();

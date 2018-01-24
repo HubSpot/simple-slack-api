@@ -75,7 +75,7 @@ public interface SlackSession {
 
     SlackMessageHandle<ParsedSlackReply> inviteUser(String email, String firstName, boolean setActive);
 
-    void connect() throws Exception;
+    void connect() throws IOException;
 
     void disconnect() throws IOException;
 
