@@ -1,11 +1,12 @@
 package com.ullink.slack.simpleslackapi;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ullink.slack.simpleslackapi.SlackUser;
+import com.ullink.slack.simpleslackapi.SlackSession.GetUsersForChannel;
+
 
 //TODO: a domain object
 public class SlackChannel {
@@ -13,15 +14,24 @@ public class SlackChannel {
     private String         id;
     private String         name;
     private Set<SlackUser> members = new HashSet<>();
+    private GetUsersForChannel getUsersForChannel;
     private String         topic;
     private String         purpose;
     private boolean        isMember;
     private boolean        isArchived;
 
-    public SlackChannel(String id, String name, String topic, String purpose, boolean direct, boolean isMember, boolean isArchived)
+    public SlackChannel(String id,
+                        String name,
+                        GetUsersForChannel getUsersForChannel,
+                        String topic,
+                        String purpose,
+                        boolean direct,
+                        boolean isMember,
+                        boolean isArchived)
     {
         this.id = id;
         this.name = name;
+        this.getUsersForChannel = getUsersForChannel;
         this.topic = topic;
         this.purpose = purpose;
         this.direct = direct;
@@ -49,9 +59,16 @@ public class SlackChannel {
         return name;
     }
 
-    public Collection<SlackUser> getMembers()
-    {
-        return new ArrayList<>(members);
+    public Collection<SlackUser> getMembers() {
+        if (members.isEmpty()) {
+            try {
+                getUsersForChannel.setChannelId(id);
+                return getUsersForChannel.call();
+            } catch (Exception e) {
+                return Collections.emptySet();
+            }
+        }
+        return members;
     }
 
     public String getTopic()

@@ -3,13 +3,19 @@ package com.ullink.slack.simpleslackapi.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.ullink.slack.simpleslackapi.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.ullink.slack.simpleslackapi.SlackChannel;
+import com.ullink.slack.simpleslackapi.SlackIntegration;
+import com.ullink.slack.simpleslackapi.SlackPersona;
+import com.ullink.slack.simpleslackapi.SlackSession.GetUsersForChannel;
+import com.ullink.slack.simpleslackapi.SlackTeam;
+import com.ullink.slack.simpleslackapi.SlackUser;
 
 
 class SlackJSONSessionStatusParser {
@@ -18,6 +24,7 @@ class SlackJSONSessionStatusParser {
     private Map<String, SlackChannel> channels           = new HashMap<>();
     private Map<String, SlackUser>          users        = new HashMap<>();
     private Map<String, SlackIntegration>   integrations = new HashMap<>();
+    private GetUsersForChannel getUsersForChannel;
 
     private SlackPersona sessionPersona;
 
@@ -29,9 +36,10 @@ class SlackJSONSessionStatusParser {
 
     private String                    error;
 
-    SlackJSONSessionStatusParser(String toParse)
+    SlackJSONSessionStatusParser(String toParse, GetUsersForChannel getUsersForChannel)
     {
         this.toParse = toParse;
+        this.getUsersForChannel = getUsersForChannel;
     }
 
     Map<String, SlackChannel> getChannels()
@@ -43,6 +51,7 @@ class SlackJSONSessionStatusParser {
     {
         return users;
     }
+
 
     Map<String,SlackIntegration> getIntegrations() {
         return integrations;
@@ -65,7 +74,7 @@ class SlackJSONSessionStatusParser {
         JsonObject jsonResponse = parser.parse(toParse).getAsJsonObject();
         Boolean ok = jsonResponse.get("ok").getAsBoolean();
         if (Boolean.FALSE.equals(ok)) {
-            error = (String)jsonResponse.get("error").getAsString();
+            error = jsonResponse.get("error").getAsString();
             return;
         }
         JsonArray usersJson = jsonResponse.get("users").getAsJsonArray();
@@ -94,7 +103,7 @@ class SlackJSONSessionStatusParser {
         for (JsonElement jsonObject : channelsJson)
         {
             JsonObject jsonChannel = jsonObject.getAsJsonObject();
-            SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users);
+            SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, getUsersForChannel);
             LOGGER.debug("slack public channel found : " + channel.getId());
             channels.put(channel.getId(), channel);
         }
@@ -105,7 +114,7 @@ class SlackJSONSessionStatusParser {
             for (JsonElement jsonObject : groupsJson)
             {
                 JsonObject jsonChannel = jsonObject.getAsJsonObject();
-                SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users);
+                SlackChannel channel = SlackJSONParsingUtils.buildSlackChannel(jsonChannel, users, getUsersForChannel);
                 LOGGER.debug("slack private group found : " + channel.getId());
                 channels.put(channel.getId(), channel);
             }
@@ -118,7 +127,7 @@ class SlackJSONSessionStatusParser {
             for (JsonElement jsonObject : imsJson)
             {
                 JsonObject jsonChannel = jsonObject.getAsJsonObject();
-                SlackChannel channel = SlackJSONParsingUtils.buildSlackImChannel(jsonChannel, users);
+                SlackChannel channel = SlackJSONParsingUtils.buildSlackImChannel(jsonChannel, users, getUsersForChannel);
                 LOGGER.debug("slack im channel found : " + channel.getId());
                 channels.put(channel.getId(), channel);
             }

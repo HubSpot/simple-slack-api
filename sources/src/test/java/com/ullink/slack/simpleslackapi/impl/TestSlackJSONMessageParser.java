@@ -7,6 +7,7 @@ import com.ullink.slack.simpleslackapi.*;
 import com.ullink.slack.simpleslackapi.events.*;
 import com.ullink.slack.simpleslackapi.events.userchange.SlackTeamJoin;
 import com.ullink.slack.simpleslackapi.events.userchange.SlackUserChange;
+import com.ullink.slack.simpleslackapi.impl.SlackWebSocketSessionImpl.GetUsersForChannel;
 import com.ullink.slack.simpleslackapi.replies.*;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -72,10 +73,10 @@ public class TestSlackJSONMessageParser {
 
                 integrations.put(integration.getId(),integration);
 
-                SlackChannel channel1 = new SlackChannel("TESTCHANNEL1", "testchannel1", null, null, false, false, false);
-                SlackChannel channel2 = new SlackChannel("TESTCHANNEL2", "testchannel2", null, null, false, false, false);
-                SlackChannel channel3 = new SlackChannel("TESTCHANNEL3", "testchannel3", null, null, false, false, false);
-                SlackChannel channel4 = new SlackChannel("NEWCHANNEL", "new channel", "To have something new", "This channel so new it aint even old yet", false, false, false);
+                SlackChannel channel1 = new SlackChannel("TESTCHANNEL1", "testchannel1", getUsersForChannel("TESTCHANNEL1"), null, null, false, false, false);
+                SlackChannel channel2 = new SlackChannel("TESTCHANNEL2", "testchannel2", getUsersForChannel("TESTCHANNEL2"), null, null, false, false, false);
+                SlackChannel channel3 = new SlackChannel("TESTCHANNEL3", "testchannel3", getUsersForChannel("TESTCHANNEL3"), null, null, false, false, false);
+                SlackChannel channel4 = new SlackChannel("NEWCHANNEL", "new channel", getUsersForChannel("NEWCHANNEL"), "To have something new", "This channel so new it aint even old yet", false, false, false);
                 channels.put(channel1.getId(), channel1);
                 channels.put(channel2.getId(), channel2);
                 channels.put(channel3.getId(), channel3);
@@ -189,6 +190,11 @@ public class TestSlackJSONMessageParser {
             @Override
             public SlackMessageHandle<SlackChannelReply> openMultipartyDirectMessageChannel(SlackUser... users)
             {
+                return null;
+            }
+
+            @Override
+            public GetUsersForChannel getUsersForChannel(String channelId) {
                 return null;
             }
 
