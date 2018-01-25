@@ -391,6 +391,7 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
           for (JsonElement member : answerJson.get("members").getAsJsonArray()) {
             membersForChannel.add(users.get(member.getAsString()));
           }
+          updateCursor(params, answerJson);
         } while (hasMoreMembers(answerJson));
 
         LOGGER.info("got {} members for channel {}", membersForChannel.size(), channelId);
@@ -401,6 +402,12 @@ public class SlackWebSocketSessionImpl extends AbstractSlackSessionImpl implemen
       return !answerJson.get("response_metadata").isJsonNull() &&
           !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").isJsonNull() &&
           !answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString().isEmpty();
+    }
+
+    private void updateCursor(Map<String, String> params, JsonObject answerJson) {
+      if (hasMoreMembers(answerJson)) {
+        params.put("cursor", answerJson.get("response_metadata").getAsJsonObject().get("next_cursor").getAsString());
+      }
     }
 
     private void establishWebsocketConnection() throws IOException
