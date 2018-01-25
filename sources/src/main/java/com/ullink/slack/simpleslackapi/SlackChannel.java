@@ -1,12 +1,13 @@
 package com.ullink.slack.simpleslackapi;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.threeten.bp.LocalDateTime;
 
 import com.ullink.slack.simpleslackapi.SlackSession.GetMembersForChannelCallable;
 
@@ -14,6 +15,7 @@ import com.ullink.slack.simpleslackapi.SlackSession.GetMembersForChannelCallable
 //TODO: a domain object
 public class SlackChannel {
     private static final Logger LOGGER = LoggerFactory.getLogger(SlackChannel.class);
+    private static final long REFRESH_MEMBERS_EVERY_SECONDS = TimeUnit.HOURS.toSeconds(1);
 
     private final boolean direct;
     private String         id;
@@ -24,6 +26,7 @@ public class SlackChannel {
     private String         purpose;
     private boolean        isMember;
     private boolean        isArchived;
+    private LocalDateTime  membersLastUpdated;
 
     public SlackChannel(String id,
                         String name,
@@ -65,11 +68,14 @@ public class SlackChannel {
     }
 
     public Collection<SlackUser> getMembers() {
-        try {
-            return getMembersForChannelCallable.setChannelId(id).call();
-        } catch (Exception e) {
-            return Collections.emptySet();
+        if (shouldRefreshMembers()) {
+            try {
+                members = getMembersForChannelCallable.setChannelId(id).call();
+                membersLastUpdated = LocalDateTime.now();
+            } catch (Exception ignored) {}
         }
+
+        return members;
     }
 
     public String getTopic()
@@ -118,5 +124,10 @@ public class SlackChannel {
 
     public enum SlackChannelType {
         PUBLIC_CHANNEL, PRIVATE_GROUP, INSTANT_MESSAGING
+    }
+
+    private boolean shouldRefreshMembers() {
+        return membersLastUpdated == null ||
+            LocalDateTime.now().isAfter(membersLastUpdated.plusSeconds(REFRESH_MEMBERS_EVERY_SECONDS));
     }
 }
