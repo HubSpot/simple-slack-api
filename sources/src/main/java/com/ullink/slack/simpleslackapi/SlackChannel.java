@@ -5,11 +5,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ullink.slack.simpleslackapi.SlackSession.GetMembersForChannelCallable;
 
 
 //TODO: a domain object
 public class SlackChannel {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SlackChannel.class);
+
     private final boolean direct;
     private String         id;
     private String         name;
@@ -60,6 +65,7 @@ public class SlackChannel {
     }
 
     public Collection<SlackUser> getMembers() {
+        LOGGER.info("members -- size: '{}' -- isEmpty: '{}' -- contents: {}", members.size(), members.isEmpty(), members);
         if (members.isEmpty()) {
             try {
                 return getMembersForChannelCallable.setChannelId(id).call();
