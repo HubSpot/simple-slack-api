@@ -72,7 +72,9 @@ public class SlackChannel {
             try {
                 members = getMembersForChannelCallable.setChannelId(id).call();
                 membersLastUpdated = LocalDateTime.now();
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                LOGGER.error("Failed to refresh members for {}", name, e);
+            }
         }
 
         return members;
