@@ -65,15 +65,11 @@ public class SlackChannel {
     }
 
     public Collection<SlackUser> getMembers() {
-        LOGGER.info("members -- size: '{}' -- isEmpty: '{}' -- contents: {}", members.size(), members.isEmpty(), members);
-        if (members.isEmpty()) {
-            try {
-                return getMembersForChannelCallable.setChannelId(id).call();
-            } catch (Exception e) {
-                return Collections.emptySet();
-            }
+        try {
+            return getMembersForChannelCallable.setChannelId(id).call();
+        } catch (Exception e) {
+            return Collections.emptySet();
         }
-        return members;
     }
 
     public String getTopic()
