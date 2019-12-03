@@ -54,12 +54,6 @@
         <version>1.18.2</version>
         <scope>provided</scope>
       </dependency>
-      <dependency>
-        <groupId>org.jmockit</groupId>
-        <artifactId>jmockit</artifactId>
-        <version>1.12</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
