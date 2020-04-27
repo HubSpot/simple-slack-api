@@ -129,7 +129,7 @@ public class SlackChannel {
     }
 
     private boolean shouldRefreshMembers() {
-        return getType().equals(SlackChannelType.PUBLIC_CHANNEL) &&
+        return getType() != SlackChannelType.INSTANT_MESSAGING &&
             (membersLastUpdated == null || LocalDateTime.now().isAfter(membersLastUpdated.plusSeconds(REFRESH_MEMBERS_EVERY_SECONDS)));
     }
 }
